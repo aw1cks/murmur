@@ -1,0 +1,40 @@
+---
+
+version: '3'
+
+services:
+  lego:
+    build:
+      context: ./lego/
+      args:
+        ALPINE_VERSION: '3.18'
+        GOLANG_VERSION: '1.21'
+        LEGO_VERSION: v4.14.0
+    environment:
+      DOMAINS: ${DOMAINS}
+      EMAIL: ${EMAIL}
+    volumes:
+      - letsencrypt:/letsencrypt
+    ports:
+      # Used by TLS ALPN challenge
+      - 443:443/tcp
+
+  murmur:
+    build:
+      context: ./murmur/
+      args:
+        ALPINE_VERSION: '3.18'
+        MURMUR_VERSION: '1.4.287-r4'
+    volumes:
+      - db:/data
+      - logs:/logs
+      - letsencrypt:/letsencrypt
+      - ./murmur.conf:/murmur.conf:ro
+    ports:
+      - 64738:64738/tcp
+      - 64738:64738/udp
+
+volumes:
+  db:
+  letsencrypt:
+  logs:
