@@ -29,9 +29,21 @@ if [ -z "${EMAIL}" ]; then
 	exit 3
 fi
 
+DOMAIN_ARG=''
+for DOMAIN in ${DOMAINS}; do
+    DOMAIN_ARG="${DOMAIN_ARG} --domains=${DOMAIN}"
+done
+
 lego --accept-tos --path="${LE_PATH}" --server="${URL}" --email="${EMAIL}" \
 	--key-type="${KEY_TYPE}" \
-	--domains="${DOMAINS}" \
+    ${DOMAIN_ARG} \
 	--pem \
 	--tls \
 	"${MODE}"
+
+for PROCESS in ${RELOAD_PROCESSES_SIGHUP}; do
+	pkill -HUP "${PROCESS}"
+done
+for PROCESS in ${RELOAD_PROCESSES_SIGUSR1}; do
+	pkill -USR1 "${PROCESS}"
+done

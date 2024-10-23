@@ -1,18 +1,18 @@
 ---
 
-version: '3'
-
 services:
   lego:
     build:
       context: ./lego/
       args:
-        ALPINE_VERSION: '3.18'
-        GOLANG_VERSION: '1.21'
-        LEGO_VERSION: v4.14.0
+        ALPINE_VERSION: '3.20'
+        GOLANG_VERSION: '1.22'
+        LEGO_VERSION: 'v4.19.2'
     environment:
       DOMAINS: ${DOMAINS}
       EMAIL: ${EMAIL}
+      RELOAD_PROCESSES_SIGHUP: ${RELOAD_PROCESSES_SIGHUP}
+      RELOAD_PROCESSES_SIGUSR1: ${RELOAD_PROCESSES_SIGUSR1}
     volumes:
       - letsencrypt:/letsencrypt
     ports:
@@ -23,8 +23,8 @@ services:
     build:
       context: ./murmur/
       args:
-        ALPINE_VERSION: '3.18'
-        MURMUR_VERSION: '1.4.287-r4'
+        ALPINE_VERSION: '3.20'
+        MURMUR_VERSION: '1.4.287-r11'
     volumes:
       - db:/data
       - logs:/logs
@@ -33,6 +33,9 @@ services:
     ports:
       - 64738:64738/tcp
       - 64738:64738/udp
+    # Share the PID namespace of lego container
+    # This allows lego to see the Murmur service and restart it
+    pid: service:lego
 
 volumes:
   db:
